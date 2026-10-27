@@ -1,0 +1,5 @@
+{
+  "name": "claude-artifact-view-mod",
+  "owner": { "name": "mncoffeenord" },
+  "plugins": [{ "name": "artifact-view", "source": "./" }]
+}

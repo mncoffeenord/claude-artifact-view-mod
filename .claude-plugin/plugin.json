@@ -1,0 +1,7 @@
+{
+  "name": "artifact-view",
+  "version": "0.1.0",
+  "author": { "name": "mncoffeenord" },
+  "description": "An Artifacts toggle under the message box that lists your recently updated artifacts above it; a title opens in the sidebar, the arrow in your browser.",
+  "types": "./types/index.d.ts"
+}
