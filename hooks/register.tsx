@@ -30,6 +30,8 @@ async function refresh($: EngineInterface) {
   }
   const list = result.artifacts
     .map(({ title, url, updatedAt }) => ({ title, url, updatedAt }))
+    // Untitled entries are empty drafts the Artifacts page hides; leave them out here too.
+    .filter(item => item.title.trim() !== '' && item.title.trim() !== 'Untitled')
     .sort((a, b) => Date.parse(b.updatedAt ?? '') - Date.parse(a.updatedAt ?? '') || 0)
     .filter((item, i) => i < MIN_COUNT || (i < MAX_COUNT && Date.now() - Date.parse(item.updatedAt ?? '') < RECENT_MS))
   await update($, items, () => list)
@@ -57,16 +59,6 @@ async function openInBrowser($: EngineInterface, url: string) {
   }
 }
 
-// Artifact open from a mod selects the artifact but shows nothing, so the desktop app's own pane
-// tool brings the sidebar up after it. Outside the desktop app that tool is absent; open alone stays.
-async function openInSidebar($: EngineInterface, url: string) {
-  await $.tool.call({ tool: 'Artifact', action: 'open', url })
-  try {
-    await $.tool.call({ tool: 'mcp__ccd_view__show_pane', pane: 'artifact' })
-  } catch {
-    // Not the desktop app.
-  }
-}
 
 function clip(text: string, room: number): string {
   return text.length <= room ? text : `${text.slice(0, room - 1).trimEnd()}…`
@@ -134,7 +126,6 @@ export const register: Register = on => {
             <Markdown
               key={`title-${i}`}
               text={`[${clip(item.title.replace(/[[\]]/g, ''), titleRoom)}](${item.url})`}
-              onLinkPress={() => void openInSidebar($, item.url)}
             />,
             <Text dimColor tabular>{age(item.updatedAt)}</Text>,
             <Markdown
