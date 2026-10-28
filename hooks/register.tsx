@@ -57,6 +57,21 @@ async function openInBrowser($: EngineInterface, url: string) {
   }
 }
 
+// Artifact open from a mod selects the artifact but shows nothing, so the desktop app's own pane
+// tool brings the sidebar up after it. Outside the desktop app that tool is absent; open alone stays.
+async function openInSidebar($: EngineInterface, url: string) {
+  await $.tool.call({ tool: 'Artifact', action: 'open', url })
+  try {
+    await $.tool.call({ tool: 'mcp__ccd_view__show_pane', pane: 'artifact' })
+  } catch {
+    // Not the desktop app.
+  }
+}
+
+function clip(text: string, room: number): string {
+  return text.length <= room ? text : `${text.slice(0, room - 1).trimEnd()}…`
+}
+
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     void refresh($)
@@ -81,14 +96,15 @@ export const register: Register = on => {
     return ran
   })
 
-  // The list, above the message box, only while open: a closed list draws nothing there. Each title
-  // is a plain artifact link, which the desktop app itself opens in the sidebar on one click; the ↗
-  // is the mod's, handed to the system browser.
+  // The list, above the message box, only while open: a closed list draws nothing there. Both links
+  // are the mod's: a title opens in the sidebar, the ↗ in the system browser.
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     if (e.props.hasSurvey || !(await read($, isOpen))) return next(e)
-    const { Box, Text, Button, Link, Markdown } = $.ui.resolve(e)
+    const { Box, Text, Button, Markdown } = $.ui.resolve(e)
     const list = await read($, items)
     const problem = await read($, error)
+    // A markdown link can't truncate itself, so the title is cut to the room the other columns leave.
+    const titleRoom = Math.max(12, e.props.bodyColumns - 24)
     // Columns without cells: the title takes what is left and truncates, age and ↗ keep fixed widths.
     const row = (key: string, title: JSX.Element, when: JSX.Element, web: JSX.Element) => (
       <Box key={key} flexDirection="row" columnGap="md">
@@ -115,7 +131,11 @@ export const register: Register = on => {
         {list.map((item, i) =>
           row(
             `row-${i}`,
-            <Text wrap="truncate-end"><Link href={item.url} label={item.title} /></Text>,
+            <Markdown
+              key={`title-${i}`}
+              text={`[${clip(item.title.replace(/[[\]]/g, ''), titleRoom)}](${item.url})`}
+              onLinkPress={() => void openInSidebar($, item.url)}
+            />,
             <Text dimColor tabular>{age(item.updatedAt)}</Text>,
             <Markdown
               key={`web-${i}`}
