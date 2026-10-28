@@ -97,42 +97,42 @@ export const register: Register = on => {
     const problem = await read($, error)
     // A markdown link can't truncate itself, so the title is cut to the room the other columns leave.
     const titleRoom = Math.max(12, e.props.bodyColumns - 24)
-    // Columns without cells: the title takes what is left and truncates, age and ↗ keep fixed widths.
-    const row = (key: string, title: JSX.Element, when: JSX.Element, web: JSX.Element) => (
+    // Columns: the web icon and the title link sit together on the left, the age keeps a fixed width.
+    const row = (key: string, web: JSX.Element, title: JSX.Element, when: JSX.Element) => (
       <Box key={key} flexDirection="row" columnGap="md">
+        <Box width={4} flexShrink={0}>{web}</Box>
         <Box flexGrow={1} flexShrink={1} minWidth={0}>{title}</Box>
         <Box width={7} flexShrink={0} justifyContent="flex-end">{when}</Box>
-        <Box width={4} flexShrink={0} justifyContent="flex-end">{web}</Box>
       </Box>
     )
 
     return (
-      <Box flexDirection="column" paddingX="md">
+      <Box flexDirection="column" paddingX="md" rowGap="xs">
         {problem !== '' && <Text dimColor>{problem}</Text>}
         {problem === '' && list.length === 0 && <Text dimColor>No artifacts yet.</Text>}
         {list.length > 0 &&
           row(
             'head',
-            <Box flexDirection="row" columnGap="md">
+            <Text weight="semibold">Web</Text>,
+            <Box flexDirection="row" columnGap="sm">
               <Text weight="semibold">Artifact</Text>
               <Button key="refresh" label="⟳" plain dimColor onPress={() => void refresh($)} />
             </Box>,
             <Text weight="semibold">Updated</Text>,
-            <Text weight="semibold">Web</Text>,
           )}
         {list.map((item, i) =>
           row(
             `row-${i}`,
             <Markdown
+              key={`web-${i}`}
+              text={`[🌐](${item.url}#web)`}
+              onLinkPress={link => void openInBrowser($, link.href.replace(/#web$/, ''))}
+            />,
+            <Markdown
               key={`title-${i}`}
               text={`[${clip(item.title.replace(/[[\]]/g, ''), titleRoom)}](${item.url})`}
             />,
             <Text dimColor tabular>{age(item.updatedAt)}</Text>,
-            <Markdown
-              key={`web-${i}`}
-              text={`[↗](${item.url}#web)`}
-              onLinkPress={link => void openInBrowser($, link.href.replace(/#web$/, ''))}
-            />,
           ),
         )}
       </Box>
