@@ -1,5 +1,13 @@
 {
   "name": "claude-artifact-view-mod",
-  "owner": { "name": "mncoffeenord" },
-  "plugins": [{ "name": "artifact-view", "source": "./" }]
+  "owner": {
+    "name": "mncoffeenord"
+  },
+  "plugins": [
+    {
+      "name": "artifact-view",
+      "source": "./"
+    }
+  ],
+  "description": "Artifact QuickView - browse your recently updated artifacts from inside the chat."
 }
