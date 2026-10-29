@@ -1,11 +1,12 @@
 {
   "name": "artifact-view",
   "displayName": "Artifact QuickView",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "author": {
     "name": "mncoffeenord"
   },
   "description": "An Artifacts toggle under the message box that lists your recently updated artifacts above it; a title opens in the sidebar, the arrow in your browser.",
+  "license": "MIT",
   "icon": ".claude-plugin/icon.png",
   "types": "./types/index.d.ts"
 }
